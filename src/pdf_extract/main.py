@@ -1,65 +1,146 @@
 import argparse
+import sys
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
 
-def extract_pages(input_path: Path, pages: list[int], output_path: Path) -> None:
-    """指定されたページを抽出して新しいPDFを作成する"""
-    reader = PdfReader(input_path)
+def extract_pages(reader: PdfReader, indices: list[int], output_path: Path) -> None:
+    """指定されたインデックスのページを抽出して新しいPDFを作成する"""
     writer = PdfWriter()
-
     total_pages = len(reader.pages)
 
-    for page_num in pages:
-        if page_num < 1 or page_num > total_pages:
-            raise ValueError(f"ページ {page_num} は範囲外です (1-{total_pages})")
-        writer.add_page(reader.pages[page_num - 1])
+    for idx in indices:
+        if idx < 0 or idx >= total_pages:
+            raise ValueError(f"インデックス {idx} は範囲外です (0-{total_pages - 1})")
+        writer.add_page(reader.pages[idx])
 
     with open(output_path, "wb") as f:
         writer.write(f)
 
 
-def parse_pages(pages_str: str) -> list[int]:
-    """ページ指定文字列をパースする (例: "1,3,5-7" -> [1,3,5,6,7])"""
-    pages = []
+def parse_pages_by_index(pages_str: str) -> list[int]:
+    """ページ指定文字列をパースする (例: "1,3,5-7" -> [0,2,4,5,6])
+
+    ユーザー入力は1-based、返り値は0-basedインデックス
+    """
+    indices = []
     for part in pages_str.split(","):
         part = part.strip()
         if "-" in part:
             start, end = part.split("-", 1)
-            pages.extend(range(int(start), int(end) + 1))
+            indices.extend(range(int(start) - 1, int(end)))
         else:
-            pages.append(int(part))
-    return pages
+            indices.append(int(part) - 1)
+    return indices
+
+
+def parse_pages_by_label(pages_str: str, label_to_index: dict[str, int]) -> list[int]:
+    """ラベル指定文字列をパースする (例: "i,ii,iii" or "i-v")
+
+    範囲指定の場合、ラベルリスト内での位置ベースで範囲を取得
+    """
+    indices = []
+    for part in pages_str.split(","):
+        part = part.strip()
+        if "-" in part:
+            start_label, end_label = part.split("-", 1)
+            start_label = start_label.strip()
+            end_label = end_label.strip()
+            if start_label not in label_to_index:
+                raise ValueError(f"ラベル '{start_label}' が見つかりません")
+            if end_label not in label_to_index:
+                raise ValueError(f"ラベル '{end_label}' が見つかりません")
+            start_idx = label_to_index[start_label]
+            end_idx = label_to_index[end_label]
+            if start_idx > end_idx:
+                start_idx, end_idx = end_idx, start_idx
+            indices.extend(range(start_idx, end_idx + 1))
+        else:
+            if part not in label_to_index:
+                raise ValueError(f"ラベル '{part}' が見つかりません")
+            indices.append(label_to_index[part])
+    return indices
+
+
+def build_label_to_index(labels: list[str]) -> dict[str, int]:
+    """ラベルからインデックスへのマッピングを作成
+
+    重複ラベルがある場合は最初の出現位置を使用
+    """
+    mapping = {}
+    for idx, label in enumerate(labels):
+        if label not in mapping:
+            mapping[label] = idx
+    return mapping
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="PDFからページを抽出する")
     parser.add_argument("input", type=Path, help="入力PDFファイル")
-    parser.add_argument("-f", "--from", dest="from_page", type=int, help="開始ページ")
-    parser.add_argument("-t", "--to", dest="to_page", type=int, help="終了ページ")
+    parser.add_argument("-f", "--from", dest="from_page", type=str, help="開始ページ")
+    parser.add_argument("-t", "--to", dest="to_page", type=str, help="終了ページ")
     parser.add_argument(
         "-p", "--pages", type=str, help="抽出するページ (例: 1,3,5-7)"
     )
     parser.add_argument("-o", "--output", type=Path, help="出力ファイル名")
+    parser.add_argument(
+        "-l", "--by-label", action="store_true",
+        help="ページ番号をラベル（ローマ数字等）として解釈する"
+    )
 
     args = parser.parse_args()
 
     if not args.input.exists():
-        print(f"エラー: 入力ファイル '{args.input}' が見つかりません", file=__import__("sys").stderr)
+        print(f"エラー: 入力ファイル '{args.input}' が見つかりません", file=sys.stderr)
         raise SystemExit(1)
 
-    if args.pages:
-        pages = parse_pages(args.pages)
-        default_output = f"{args.pages.replace(',', '_')}.pdf"
-    elif args.from_page and args.to_page:
-        pages = list(range(args.from_page, args.to_page + 1))
-        default_output = f"{args.from_page}-{args.to_page}.pdf"
-    elif args.from_page:
-        pages = [args.from_page]
-        default_output = f"{args.from_page}.pdf"
+    reader = PdfReader(args.input)
+    total_pages = len(reader.pages)
+
+    if args.by_label:
+        labels = reader.page_labels
+        label_to_index = build_label_to_index(labels)
+
+        if args.pages:
+            indices = parse_pages_by_label(args.pages, label_to_index)
+            default_output = f"{args.pages.replace(',', '_')}.pdf"
+        elif args.from_page and args.to_page:
+            if args.from_page not in label_to_index:
+                print(f"エラー: ラベル '{args.from_page}' が見つかりません", file=sys.stderr)
+                raise SystemExit(1)
+            if args.to_page not in label_to_index:
+                print(f"エラー: ラベル '{args.to_page}' が見つかりません", file=sys.stderr)
+                raise SystemExit(1)
+            start_idx = label_to_index[args.from_page]
+            end_idx = label_to_index[args.to_page]
+            if start_idx > end_idx:
+                start_idx, end_idx = end_idx, start_idx
+            indices = list(range(start_idx, end_idx + 1))
+            default_output = f"{args.from_page}-{args.to_page}.pdf"
+        elif args.from_page:
+            if args.from_page not in label_to_index:
+                print(f"エラー: ラベル '{args.from_page}' が見つかりません", file=sys.stderr)
+                raise SystemExit(1)
+            indices = [label_to_index[args.from_page]]
+            default_output = f"{args.from_page}.pdf"
+        else:
+            parser.error("--from/--to または --pages を指定してください")
     else:
-        parser.error("--from/--to または --pages を指定してください")
+        if args.pages:
+            indices = parse_pages_by_index(args.pages)
+            default_output = f"{args.pages.replace(',', '_')}.pdf"
+        elif args.from_page and args.to_page:
+            from_page = int(args.from_page)
+            to_page = int(args.to_page)
+            indices = list(range(from_page - 1, to_page))
+            default_output = f"{from_page}-{to_page}.pdf"
+        elif args.from_page:
+            from_page = int(args.from_page)
+            indices = [from_page - 1]
+            default_output = f"{from_page}.pdf"
+        else:
+            parser.error("--from/--to または --pages を指定してください")
 
     out_dir = Path("out")
     out_dir.mkdir(exist_ok=True)
@@ -67,11 +148,16 @@ def main() -> None:
     output_path = out_dir / (args.output or Path(default_output))
 
     if output_path.exists():
-        print(f"エラー: {output_path} は既に存在します", file=__import__("sys").stderr)
+        print(f"エラー: {output_path} は既に存在します", file=sys.stderr)
         raise SystemExit(1)
 
-    extract_pages(args.input, pages, output_path)
-    print(f"抽出完了: {output_path} ({len(pages)}ページ)")
+    try:
+        extract_pages(reader, indices, output_path)
+    except ValueError as e:
+        print(f"エラー: {e}", file=sys.stderr)
+        raise SystemExit(1)
+
+    print(f"抽出完了: {output_path} ({len(indices)}ページ)")
 
 
 if __name__ == "__main__":
