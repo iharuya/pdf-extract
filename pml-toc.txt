@@ -1,0 +1,713 @@
+1 Introduction 1
+1.1 What is machine learning? 1
+1.2 Supervised learning 1
+1.2.1 Classification 2
+1.2.2 Regression 8
+1.2.3 Overfitting and generalization 12
+1.2.4 No free lunch theorem 13
+1.3 Unsupervised learning 14
+1.3.1 Clustering 14
+1.3.2 Discovering latent “factors of variation” 15
+1.3.3 Self-supervised learning 16
+1.3.4 Evaluating unsupervised learning 16
+1.4 Reinforcement learning 17
+1.5 Data 19
+1.5.1 Some common image datasets 19
+1.5.2 Some common text datasets 21
+1.5.3 Preprocessing discrete input data 23
+1.5.4 Preprocessing text data 24
+1.5.5 Handling missing data 26
+1.6 Discussion 27
+1.6.1 The relationship between ML and other fields 27
+1.6.2 Structure of the book 28
+1.6.3 Caveats 28
+I Foundations 31
+2 Probability: Univariate Models 33
+2.1 Introduction 33
+2.1.1 What is probability? 33
+2.1.2 Types of uncertainty 33
+2.1.3 Probability as an extension of logic 34
+2.2 Random variables 35
+2.2.1 Discrete random variables 35
+2.2.2 Continuous random variables 36
+2.2.3 Sets of related random variables 38
+2.2.4 Independence and conditional independence 39
+2.2.5 Moments of a distribution 40
+2.2.6 Limitations of summary statistics * 43
+2.3 Bayes’ rule 44
+2.3.1 Example: Testing for COVID-19 46
+2.3.2 Example: The Monty Hall problem 47
+2.3.3 Inverse problems * 49
+2.4 Bernoulli and binomial distributions 49
+2.4.1 Definition 49
+2.4.2 Sigmoid (logistic) function 50
+2.4.3 Binary logistic regression 52
+2.5 Categorical and multinomial distributions 53
+2.5.1 Definition 53
+2.5.2 Softmax function 54
+2.5.3 Multiclass logistic regression 55
+2.5.4 Log-sum-exp trick 56
+2.6 Univariate Gaussian (normal) distribution 57
+2.6.1 Cumulative distribution function 57
+2.6.2 Probability density function 58
+2.6.3 Regression 59
+2.6.4 Why is the Gaussian distribution so widely used? 60
+2.6.5 Dirac delta function as a limiting case 60
+2.6.6 Truncated Gaussian distribution 61
+2.7 Some other common univariate distributions * 61
+2.7.1 Student t distribution 61
+2.7.2 Cauchy distribution 63
+2.7.3 Laplace distribution 63
+2.7.4 Beta distribution 63
+2.7.5 Gamma distribution 64
+2.7.6 Empirical distribution 65
+2.8 Transformations of random variables * 66
+2.8.1 Discrete case 66
+2.8.2 Continuous case 67
+2.8.3 Invertible transformations (bijections) 67
+2.8.4 Moments of a linear transformation 69
+2.8.5 The convolution theorem 70
+2.8.6 Central limit theorem 72
+2.8.7 Monte Carlo approximation 73
+2.9 Exercises 73
+3 Probability: Multivariate Models 77
+3.1 Joint distributions for multiple random variables 77
+3.1.1 Covariance 77
+3.1.2 Correlation 78
+3.1.3 Uncorrelated does not imply independent 79
+3.1.4 Correlation does not imply causation 79
+3.1.5 Simpson’s paradox 80
+3.2 The multivariate Gaussian (normal) distribution 80
+3.2.1 Definition 81
+3.2.2 Mahalanobis distance 83
+3.2.3 Marginals and conditionals of an MVN * 84
+3.2.4 Example: conditioning a 2d Gaussian 85
+3.2.5 Example: Imputing missing values * 85
+3.3 Linear Gaussian systems * 86
+3.3.1 Bayes rule for Gaussians 87
+3.3.2 Derivation * 87
+3.3.3 Example: Inferring an unknown scalar 88
+3.3.4 Example: inferring an unknown vector 90
+3.3.5 Example: sensor fusion 92
+3.4 The exponential family * 93
+3.4.1 Definition 93
+3.4.2 Example 94
+3.4.3 Log partition function is cumulant generating function 95
+3.4.4 Maximum entropy derivation of the exponential family 95
+3.5 Mixture models 96
+3.5.1 Gaussian mixture models 97
+3.5.2 Bernoulli mixture models 98
+3.6 Probabilistic graphical models * 99
+3.6.1 Representation 100
+3.6.2 Inference 102
+3.6.3 Learning 102
+3.7 Exercises 103
+4 Statistics 107
+4.1 Introduction 107
+4.2 Maximum likelihood estimation (MLE) 107
+4.2.1 Definition 107
+4.2.2 Justification for MLE 108
+4.2.3 Example: MLE for the Bernoulli distribution 110
+4.2.4 Example: MLE for the categorical distribution 111
+4.2.5 Example: MLE for the univariate Gaussian 111
+4.2.6 Example: MLE for the multivariate Gaussian 112
+4.2.7 Example: MLE for linear regression 114
+4.3 Empirical risk minimization (ERM) 115
+4.3.1 Example: minimizing the misclassification rate 116
+4.3.2 Surrogate loss 116
+4.4 Other estimation methods * 117
+4.4.1 The method of moments 117
+4.4.2 Online (recursive) estimation 119
+4.5 Regularization 120
+4.5.1 Example: MAP estimation for the Bernoulli distribution 121
+4.5.2 Example: MAP estimation for the multivariate Gaussian * 122
+4.5.3 Example: weight decay 123
+4.5.4 Picking the regularizer using a validation set 124
+4.5.5 Cross-validation 125
+4.5.6 Early stopping 126
+4.5.7 Using more data 127
+4.6 Bayesian statistics * 129
+4.6.1 Conjugate priors 129
+4.6.2 The beta-binomial model 130
+4.6.3 The Dirichlet-multinomial model 137
+4.6.4 The Gaussian-Gaussian model 141
+4.6.5 Beyond conjugate priors 144
+4.6.6 Credible intervals 146
+4.6.7 Bayesian machine learning 147
+4.6.8 Computational issues 151
+4.7 Frequentist statistics * 154
+4.7.1 Sampling distributions 154
+4.7.2 Gaussian approximation of the sampling distribution of the MLE 155
+4.7.3 Bootstrap approximation of the sampling distribution of any estimator 156
+4.7.4 Confidence intervals 157
+4.7.5 Caution: Confidence intervals are not credible 158
+4.7.6 The bias-variance tradeoff 159
+4.8 Exercises 164
+5 Decision Theory 167
+5.1 Bayesian decision theory 167
+5.1.1 Basics 167
+5.1.2 Classification problems 169
+5.1.3 ROC curves 171
+5.1.4 Precision-recall curves 174
+5.1.5 Regression problems 176
+5.1.6 Probabilistic prediction problems 177
+5.2 Choosing the “right” model 179
+5.2.1 Bayesian hypothesis testing 179
+5.2.2 Bayesian model selection 181
+5.2.3 Occam’s razor 183
+5.2.4 Connection between cross validation and marginal likelihood 184
+5.2.5 Information criteria 185
+5.2.6 Posterior inference over effect sizes and Bayesian significance testing 187
+5.3 Frequentist decision theory 189
+5.3.1 Computing the risk of an estimator 189
+5.3.2 Consistent estimators 192
+5.3.3 Admissible estimators 192
+5.4 Empirical risk minimization 193
+5.4.1 Empirical risk 193
+5.4.2 Structural risk 195
+5.4.3 Cross-validation 196
+5.4.4 Statistical learning theory * 196
+5.5 Frequentist hypothesis testing * 198
+5.5.1 Likelihood ratio test 198
+5.5.2 Type I vs type II errors and the Neyman-Pearson lemma 199
+5.5.3 Null hypothesis significance testing (NHST) and p-values 200
+5.5.4 p-values considered harmful 201
+5.5.5 Why isn’t everyone a Bayesian? 202
+5.6 Exercises 204
+6 Information Theory 207
+6.1 Entropy 207
+6.1.1 Entropy for discrete random variables 207
+6.1.2 Cross entropy 209
+6.1.3 Joint entropy 209
+6.1.4 Conditional entropy 210
+6.1.5 Perplexity 211
+6.1.6 Differential entropy for continuous random variables * 212
+6.2 Relative entropy (KL divergence) * 213
+6.2.1 Definition 213
+6.2.2 Interpretation 214
+6.2.3 Example: KL divergence between two Gaussians 214
+6.2.4 Non-negativity of KL 214
+6.2.5 KL divergence and MLE 215
+6.2.6 Forward vs reverse KL 216
+6.3 Mutual information * 217
+6.3.1 Definition 217
+6.3.2 Interpretation 218
+6.3.3 Example 218
+6.3.4 Conditional mutual information 219
+6.3.5 MI as a “generalized correlation coefficient” 220
+6.3.6 Normalized mutual information 221
+6.3.7 Maximal information coefficient 221
+6.3.8 Data processing inequality 223
+6.3.9 Sufficient Statistics 224
+6.3.10 Fano’s inequality * 225
+6.4 Exercises 226
+7 Linear Algebra 229
+7.1 Introduction 229
+7.1.1 Notation 229
+7.1.2 Vector spaces 232
+7.1.3 Norms of a vector and matrix 234
+7.1.4 Properties of a matrix 236
+7.1.5 Special types of matrices 239
+7.2 Matrix multiplication 242
+7.2.1 Vector–vector products 242
+7.2.2 Matrix–vector products 243
+7.2.3 Matrix–matrix products 243
+7.2.4 Application: manipulating data matrices 245
+7.2.5 Kronecker products * 248
+7.2.6 Einstein summation * 248
+7.3 Matrix inversion 249
+7.3.1 The inverse of a square matrix 249
+7.3.2 Schur complements * 250
+7.3.3 The matrix inversion lemma * 251
+7.3.4 Matrix determinant lemma * 251
+7.3.5 Application: deriving the conditionals of an MVN * 252
+7.4 Eigenvalue decomposition (EVD) 253
+7.4.1 Basics 253
+7.4.2 Diagonalization 254
+7.4.3 Eigenvalues and eigenvectors of symmetric matrices 255
+7.4.4 Geometry of quadratic forms 256
+7.4.5 Standardizing and whitening data 256
+7.4.6 Power method 258
+7.4.7 Deflation 259
+7.4.8 Eigenvectors optimize quadratic forms 259
+7.5 Singular value decomposition (SVD) 259
+7.5.1 Basics 259
+7.5.2 Connection between SVD and EVD 260
+7.5.3 Pseudo inverse 261
+7.5.4 SVD and the range and null space of a matrix * 262
+7.5.5 Truncated SVD 264
+7.6 Other matrix decompositions * 264
+7.6.1 LU factorization 264
+7.6.2 QR decomposition 265
+7.6.3 Cholesky decomposition 266
+7.7 Solving systems of linear equations * 266
+7.7.1 Solving square systems 267
+7.7.2 Solving underconstrained systems (least norm estimation) 267
+7.7.3 Solving overconstrained systems (least squares estimation) 268
+7.8 Matrix calculus 269
+7.8.1 Derivatives 269
+7.8.2 Gradients 270
+7.8.3 Directional derivative 270
+7.8.4 Total derivative * 271
+7.8.5 Jacobian 271
+7.8.6 Hessian 272
+7.8.7 Gradients of commonly used functions 272
+7.9 Exercises 274
+8 Optimization 275
+8.1 Introduction 275
+8.1.1 Local vs global optimization 275
+8.1.2 Constrained vs unconstrained optimization 277
+8.1.3 Convex vs nonconvex optimization 277
+8.1.4 Smooth vs nonsmooth optimization 281
+8.2 First-order methods 282
+8.2.1 Descent direction 284
+8.2.2 Step size (learning rate) 284
+8.2.3 Convergence rates 286
+8.2.4 Momentum methods 287
+8.3 Second-order methods 289
+8.3.1 Newton’s method 289
+8.3.2 BFGS and other quasi-Newton methods 290
+8.3.3 Trust region methods 291
+8.4 Stochastic gradient descent 292
+8.4.1 Application to finite sum problems 293
+8.4.2 Example: SGD for fitting linear regression 293
+8.4.3 Choosing the step size (learning rate) 294
+8.4.4 Iterate averaging 297
+8.4.5 Variance reduction * 297
+8.4.6 Preconditioned SGD 298
+8.5 Constrained optimization 302
+8.5.1 Lagrange multipliers 302
+8.5.2 The KKT conditions 304
+8.5.3 Linear programming 305
+8.5.4 Quadratic programming 306
+8.5.5 Mixed integer linear programming * 307
+8.6 Proximal gradient method * 308
+8.6.1 Projected gradient descent 308
+8.6.2 Proximal operator for ℓ1-norm regularizer 310
+8.6.3 Proximal operator for quantization 311
+8.6.4 Incremental (online) proximal methods 311
+8.7 Bound optimization * 312
+8.7.1 The general algorithm 312
+8.7.2 The EM algorithm 312
+8.7.3 Example: EM for a GMM 315
+8.8 Blackbox and derivative free optimization 319
+8.9 Exercises 320
+II Linear Models 321
+9 Linear Discriminant Analysis 323
+9.1 Introduction 323
+9.2 Gaussian discriminant analysis 323
+9.2.1 Quadratic decision boundaries 324
+9.2.2 Linear decision boundaries 325
+9.2.3 The connection between LDA and logistic regression 325
+9.2.4 Model fitting 326
+9.2.5 Nearest centroid classifier 328
+9.2.6 Fisher’s linear discriminant analysis * 328
+9.3 Naive Bayes classifiers 332
+9.3.1 Example models 332
+9.3.2 Model fitting 333
+9.3.3 Bayesian naive Bayes 334
+9.3.4 The connection between naive Bayes and logistic regression 335
+9.4 Generative vs discriminative classifiers 336
+9.4.1 Advantages of discriminative classifiers 336
+9.4.2 Advantages of generative classifiers 337
+9.4.3 Handling missing features 337
+9.5 Exercises 338
+10 Logistic Regression 339
+10.1 Introduction 339
+10.2 Binary logistic regression 339
+10.2.1 Linear classifiers 339
+10.2.2 Nonlinear classifiers 340
+10.2.3 Maximum likelihood estimation 342
+10.2.4 Stochastic gradient descent 345
+10.2.5 Perceptron algorithm 346
+10.2.6 Iteratively reweighted least squares 346
+10.2.7 MAP estimation 348
+10.2.8 Standardization 350
+10.3 Multinomial logistic regression 350
+10.3.1 Linear and nonlinear classifiers 351
+10.3.2 Maximum likelihood estimation 351
+10.3.3 Gradient-based optimization 354
+10.3.4 Bound optimization 354
+10.3.5 MAP estimation 355
+10.3.6 Maximum entropy classifiers 356
+10.3.7 Hierarchical classification 357
+10.3.8 Handling large numbers of classes 358
+10.4 Robust logistic regression * 360
+10.4.1 Mixture model for the likelihood 360
+10.4.2 Bi-tempered loss 361
+10.5 Bayesian logistic regression * 363
+10.5.1 Laplace approximation 363
+10.5.2 Approximating the posterior predictive 366
+10.6 Exercises 367
+11 Linear Regression 371
+11.1 Introduction 371
+11.2 Least squares linear regression 371
+11.2.1 Terminology 371
+11.2.2 Least squares estimation 372
+11.2.3 Other approaches to computing the MLE 376
+11.2.4 Measuring goodness of fit 380
+11.3 Ridge regression 381
+11.3.1 Computing the MAP estimate 382
+11.3.2 Connection between ridge regression and PCA 383
+11.3.3 Choosing the strength of the regularizer 384
+11.4 Lasso regression 385
+11.4.1 MAP estimation with a Laplace prior (ℓ1 regularization) 385
+11.4.2 Why does ℓ1 regularization yield sparse solutions? 386
+11.4.3 Hard vs soft thresholding 387
+11.4.4 Regularization path 389
+11.4.5 Comparison of least squares, lasso, ridge and subset selection 390
+11.4.6 Variable selection consistency 392
+11.4.7 Group lasso 393
+11.4.8 Elastic net (ridge and lasso combined) 396
+11.4.9 Optimization algorithms 397
+11.5 Regression splines * 399
+11.5.1 B-spline basis functions 399
+11.5.2 Fitting a linear model using a spline basis 401
+11.5.3 Smoothing splines 401
+11.5.4 Generalized additive models 401
+11.6 Robust linear regression * 402
+11.6.1 Laplace likelihood 402
+11.6.2 Student-t likelihood 404
+11.6.3 Huber loss 404
+11.6.4 RANSAC 404
+11.7 Bayesian linear regression * 405
+11.7.1 Priors 405
+11.7.2 Posteriors 405
+11.7.3 Example 406
+11.7.4 Computing the posterior predictive 406
+11.7.5 The advantage of centering 408
+11.7.6 Dealing with multicollinearity 409
+11.7.7 Automatic relevancy determination (ARD) * 410
+11.8 Exercises 411
+12 Generalized Linear Models * 415
+12.1 Introduction 415
+12.2 Examples 415
+12.2.1 Linear regression 416
+12.2.2 Binomial regression 416
+12.2.3 Poisson regression 417
+12.3 GLMs with non-canonical link functions 417
+12.4 Maximum likelihood estimation 418
+12.5 Worked example: predicting insurance claims 419
+III Deep Neural Networks 423
+13 Neural Networks for Tabular Data 425
+13.1 Introduction 425
+13.2 Multilayer perceptrons (MLPs) 426
+13.2.1 The XOR problem 427
+13.2.2 Differentiable MLPs 428
+13.2.3 Activation functions 428
+13.2.4 Example models 430
+13.2.5 The importance of depth 434
+13.2.6 The “deep learning revolution” 435
+13.2.7 Connections with biology 436
+13.3 Backpropagation 438
+13.3.1 Forward vs reverse mode differentiation 438
+13.3.2 Reverse mode differentiation for multilayer perceptrons 440
+13.3.3 Vector-Jacobian product for common layers 441
+13.3.4 Computation graphs 444
+13.4 Training neural networks 446
+13.4.1 Tuning the learning rate 447
+13.4.2 Vanishing and exploding gradients 447
+13.4.3 Non-saturating activation functions 448
+13.4.4 Residual connections 451
+13.4.5 Parameter initialization 452
+13.4.6 Parallel training 454
+13.5 Regularization 455
+13.5.1 Early stopping 455
+13.5.2 Weight decay 455
+13.5.3 Sparse DNNs 455
+13.5.4 Dropout 455
+13.5.5 Bayesian neural networks 457
+13.5.6 Regularization effects of (stochastic) gradient descent * 457
+13.5.7 Over-parameterized models 459
+13.6 Other kinds of feedforward networks * 459
+13.6.1 Radial basis function networks 459
+13.6.2 Mixtures of experts 461
+13.7 Exercises 463
+14 Neural Networks for Images 467
+14.1 Introduction 467
+14.2 Common layers 468
+14.2.1 Convolutional layers 468
+14.2.2 Pooling layers 475
+14.2.3 Putting it all together 476
+14.2.4 Normalization layers 476
+14.3 Common architectures for image classification 479
+14.3.1 LeNet 479
+14.3.2 AlexNet 481
+14.3.3 GoogLeNet (Inception) 482
+14.3.4 ResNet 483
+14.3.5 DenseNet 484
+14.3.6 Neural architecture search 485
+14.4 Other forms of convolution * 486
+14.4.1 Dilated convolution 486
+14.4.2 Transposed convolution 486
+14.4.3 Depthwise separable convolution 488
+14.5 Solving other discriminative vision tasks with CNNs * 488
+14.5.1 Image tagging 488
+14.5.2 Object detection 489
+14.5.3 Instance segmentation 490
+14.5.4 Semantic segmentation 491
+14.5.5 Human pose estimation 492
+14.6 Generating images by inverting CNNs * 493
+14.6.1 Converting a trained classifier into a generative model 493
+14.6.2 Image priors 494
+14.6.3 Visualizing the features learned by a CNN 495
+14.6.4 Deep Dream 496
+14.6.5 Neural style transfer 497
+15 Neural Networks for Sequences 503
+15.1 Introduction 503
+15.2 Recurrent neural networks (RNNs) 503
+15.2.1 Vec2Seq (sequence generation) 503
+15.2.2 Seq2Vec (sequence classification) 505
+15.2.3 Seq2Seq (sequence translation) 507
+15.2.4 Teacher forcing 509
+15.2.5 Backpropagation through time 510
+15.2.6 Vanishing and exploding gradients 511
+15.2.7 Gating and long term memory 512
+15.2.8 Beam search 515
+15.3 1d CNNs 516
+15.3.1 1d CNNs for sequence classification 516
+15.3.2 Causal 1d CNNs for sequence generation 517
+15.4 Attention 518
+15.4.1 Attention as soft dictionary lookup 519
+15.4.2 Kernel regression as non-parametric attention 520
+15.4.3 Parametric attention 521
+15.4.4 Seq2Seq with attention 522
+15.4.5 Seq2vec with attention (text classification) 523
+15.4.6 Seq+Seq2Vec with attention (text pair classification) 523
+15.4.7 Soft vs hard attention 525
+15.5 Transformers 526
+15.5.1 Self-attention 526
+15.5.2 Multi-headed attention 527
+15.5.3 Positional encoding 528
+15.5.4 Putting it all together 529
+15.5.5 Comparing transformers, CNNs and RNNs 531
+15.5.6 Transformers for images * 532
+15.5.7 Other transformer variants * 533
+15.6 Efficient transformers * 533
+15.6.1 Fixed non-learnable localized attention patterns 534
+15.6.2 Learnable sparse attention patterns 535
+15.6.3 Memory and recurrence methods 535
+15.6.4 Low-rank and kernel methods 535
+15.7 Language models and unsupervised representation learning 537
+15.7.1 Non-generative language models 538
+15.7.2 Generative (causal) Large Language Models (LLMs) 542
+IV Nonparametric Models 545
+16 Exemplar-based Methods 547
+16.1 K nearest neighbor (KNN) classification 547
+16.1.1 Example 548
+16.1.2 The curse of dimensionality 548
+16.1.3 Reducing the speed and memory requirements 550
+16.1.4 Open set recognition 550
+16.2 Learning distance metrics 551
+16.2.1 Linear and convex methods 552
+16.2.2 Deep metric learning 554
+16.2.3 Classification losses 554
+16.2.4 Ranking losses 555
+16.2.5 Speeding up ranking loss optimization 556
+16.2.6 Other training tricks for DML 559
+16.3 Kernel density estimation (KDE) 560
+16.3.1 Density kernels 560
+16.3.2 Parzen window density estimator 561
+16.3.3 How to choose the bandwidth parameter 562
+16.3.4 From KDE to KNN classification 563
+16.3.5 Kernel regression 563
+17 Kernel Methods * 567
+17.1 Mercer kernels 567
+17.1.1 Mercer’s theorem 568
+17.1.2 Some popular Mercer kernels 569
+17.2 Gaussian processes 574
+17.2.1 Noise-free observations 574
+17.2.2 Noisy observations 575
+17.2.3 Comparison to kernel regression 576
+17.2.4 Weight space vs function space 577
+17.2.5 Numerical issues 577
+17.2.6 Estimating the kernel 578
+17.2.7 GPs for classification 581
+17.2.8 Connections with deep learning 582
+17.2.9 Scaling GPs to large datasets 582
+17.3 Support vector machines (SVMs) 585
+17.3.1 Large margin classifiers 585
+17.3.2 The dual problem 587
+17.3.3 Soft margin classifiers 589
+17.3.4 The kernel trick 590
+17.3.5 Converting SVM outputs into probabilities 591
+17.3.6 Connection with logistic regression 591
+17.3.7 Multi-class classification with SVMs 592
+17.3.8 How to choose the regularizer C 593
+17.3.9 Kernel ridge regression 594
+17.3.10 SVMs for regression 595
+17.4 Sparse vector machines 597
+17.4.1 Relevance vector machines (RVMs) 598
+17.4.2 Comparison of sparse and dense kernel methods 598
+17.5 Exercises 601
+18 Trees, Forests, Bagging, and Boosting 603
+18.1 Classification and regression trees (CART) 603
+18.1.1 Model definition 603
+18.1.2 Model fitting 605
+18.1.3 Regularization 606
+18.1.4 Handling missing input features 606
+18.1.5 Pros and cons 606
+18.2 Ensemble learning 608
+18.2.1 Stacking 608
+18.2.2 Ensembling is not Bayes model averaging 609
+18.3 Bagging 609
+18.4 Random forests 610
+18.5 Boosting 611
+18.5.1 Forward stagewise additive modeling 612
+18.5.2 Quadratic loss and least squares boosting 612
+18.5.3 Exponential loss and AdaBoost 613
+18.5.4 LogitBoost 616
+18.5.5 Gradient boosting 616
+18.6 Interpreting tree ensembles 620
+18.6.1 Feature importance 621
+18.6.2 Partial dependency plots 623
+V Beyond Supervised Learning 625
+19 Learning with Fewer Labeled Examples 627
+19.1 Data augmentation 627
+19.1.1 Examples 627
+19.1.2 Theoretical justification 628
+19.2 Transfer learning 628
+19.2.1 Fine-tuning 629
+19.2.2 Adapters 630
+19.2.3 Supervised pre-training 631
+19.2.4 Unsupervised pre-training (self-supervised learning) 632
+19.2.5 Domain adaptation 637
+19.3 Semi-supervised learning 638
+19.3.1 Self-training and pseudo-labeling 638
+19.3.2 Entropy minimization 639
+19.3.3 Co-training 642
+19.3.4 Label propagation on graphs 643
+19.3.5 Consistency regularization 644
+19.3.6 Deep generative models * 646
+19.3.7 Combining self-supervised and semi-supervised learning 649
+19.4 Active learning 650
+19.4.1 Decision-theoretic approach 650
+19.4.2 Information-theoretic approach 650
+19.4.3 Batch active learning 651
+19.5 Meta-learning 651
+19.5.1 Model-agnostic meta-learning (MAML) 652
+19.6 Few-shot learning 653
+19.6.1 Matching networks 653
+19.7 Weakly supervised learning 655
+19.8 Exercises 655
+20 Dimensionality Reduction 657
+20.1 Principal components analysis (PCA) 657
+20.1.1 Examples 657
+20.1.2 Derivation of the algorithm 659
+20.1.3 Computational issues 662
+20.1.4 Choosing the number of latent dimensions 664
+20.2 Factor analysis * 666
+20.2.1 Generative model 667
+20.2.2 Probabilistic PCA 668
+20.2.3 EM algorithm for FA/PPCA 669
+20.2.4 Unidentifiability of the parameters 671
+20.2.5 Nonlinear factor analysis 673
+20.2.6 Mixtures of factor analyzers 674
+20.2.7 Exponential family factor analysis 675
+20.2.8 Factor analysis models for paired data 677
+20.3 Autoencoders 679
+20.3.1 Bottleneck autoencoders 680
+20.3.2 Denoising autoencoders 681
+20.3.3 Contractive autoencoders 682
+20.3.4 Sparse autoencoders 683
+20.3.5 Variational autoencoders 683
+20.4 Manifold learning * 689
+20.4.1 What are manifolds? 689
+20.4.2 The manifold hypothesis 689
+20.4.3 Approaches to manifold learning 690
+20.4.4 Multi-dimensional scaling (MDS) 691
+20.4.5 Isomap 694
+20.4.6 Kernel PCA 695
+20.4.7 Maximum variance unfolding (MVU) 697
+20.4.8 Local linear embedding (LLE) 697
+20.4.9 Laplacian eigenmaps 699
+20.4.10 t-SNE 701
+20.5 Word embeddings 705
+20.5.1 Latent semantic analysis / indexing 705
+20.5.2 Word2vec 707
+20.5.3 GloVE 710
+20.5.4 Word analogies 710
+20.5.5 RAND-WALK model of word embeddings 711
+20.5.6 Contextual word embeddings 712
+20.6 Exercises 712
+21 Clustering 715
+21.1 Introduction 715
+21.1.1 Evaluating the output of clustering methods 715
+21.2 Hierarchical agglomerative clustering 717
+21.2.1 The algorithm 718
+21.2.2 Example 720
+21.2.3 Extensions 721
+21.3 K means clustering 722
+21.3.1 The algorithm 722
+21.3.2 Examples 722
+21.3.3 Vector quantization 724
+21.3.4 The K-means++ algorithm 725
+21.3.5 The K-medoids algorithm 725
+21.3.6 Speedup tricks 726
+21.3.7 Choosing the number of clusters K 726
+21.4 Clustering using mixture models 729
+21.4.1 Mixtures of Gaussians 730
+21.4.2 Mixtures of Bernoullis 733
+21.5 Spectral clustering * 734
+21.5.1 Normalized cuts 734
+21.5.2 Eigenvectors of the graph Laplacian encode the clustering 735
+21.5.3 Example 736
+21.5.4 Connection with other methods 737
+21.6 Biclustering * 737
+21.6.1 Basic biclustering 738
+21.6.2 Nested partition models (Crosscat) 738
+22 Recommender Systems 741
+22.1 Explicit feedback 741
+22.1.1 Datasets 741
+22.1.2 Collaborative filtering 742
+22.1.3 Matrix factorization 743
+22.1.4 Autoencoders 745
+22.2 Implicit feedback 747
+22.2.1 Bayesian personalized ranking 747
+22.2.2 Factorization machines 748
+22.2.3 Neural matrix factorization 749
+22.3 Leveraging side information 749
+22.4 Exploration-exploitation tradeoff 750
+23 Graph Embeddings * 753
+23.1 Introduction 753
+23.2 Graph Embedding as an Encoder/Decoder Problem 754
+23.3 Shallow graph embeddings 756
+23.3.1 Unsupervised embeddings 757
+23.3.2 Distance-based: Euclidean methods 757
+23.3.3 Distance-based: non-Euclidean methods 758
+23.3.4 Outer product-based: Matrix factorization methods 758
+23.3.5 Outer product-based: Skip-gram methods 759
+23.3.6 Supervised embeddings 761
+23.4 Graph Neural Networks 762
+23.4.1 Message passing GNNs 762
+23.4.2 Spectral Graph Convolutions 763
+23.4.3 Spatial Graph Convolutions 763
+23.4.4 Non-Euclidean Graph Convolutions 765
+23.5 Deep graph embeddings 765
+23.5.1 Unsupervised embeddings 766
+23.5.2 Semi-supervised embeddings 768
+23.6 Applications 769
+23.6.1 Unsupervised applications 769
+23.6.2 Supervised applications 771
+A Notation 773
+A.1 Introduction 773
+A.2 Common mathematical symbols 773
+A.3 Functions 774
+A.3.1 Common functions of one argument 774
+A.3.2 Common functions of two arguments 774
+A.3.3 Common functions of > 2 arguments 774
+A.4 Linear algebra 775
+A.4.1 General notation 775
+A.4.2 Vectors 775
+A.4.3 Matrices 775
+A.4.4 Matrix calculus 776
+A.5 Optimization 776
+A.6 Probability 777
+A.7 Information theory 777
+A.8 Statistics and machine learning 778
+A.8.1 Supervised learning 778
+A.8.2 Unsupervised learning and generative models 778
+A.8.3 Bayesian inference 778
+A.9 Abbreviations 779
+Index 781
+Bibliography 798
