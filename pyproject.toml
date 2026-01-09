@@ -1,0 +1,15 @@
+[project]
+name = "pml"
+version = "0.1.0"
+description = "PDFからページを抽出するCLIツール"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pypdf>=6.6.0",
+]
+
+[project.scripts]
+pdf-extract = "main:main"
+
+[tool.uv]
+package = true
