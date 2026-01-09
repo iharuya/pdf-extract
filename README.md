@@ -1,4 +1,4 @@
-# pml
+# pdf-extract
 
 PDFからページを抽出するCLIツール
 

@@ -1,5 +1,5 @@
 [project]
-name = "pml"
+name = "pdf-extract"
 version = "0.1.0"
 description = "PDFからページを抽出するCLIツール"
 readme = "README.md"
