@@ -5,7 +5,7 @@ description = "PDFからページを抽出するCLIツール"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "pypdf>=6.6.0",
+    "pymupdf>=1.26.7",
 ]
 
 [project.scripts]

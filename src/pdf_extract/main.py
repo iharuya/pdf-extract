@@ -2,21 +2,21 @@ import argparse
 import sys
 from pathlib import Path
 
-from pypdf import PdfReader, PdfWriter
+import fitz  # pymupdf
 
 
-def extract_pages(reader: PdfReader, indices: list[int], output_path: Path) -> None:
+def extract_pages(doc: fitz.Document, indices: list[int], output_path: Path) -> None:
     """指定されたインデックスのページを抽出して新しいPDFを作成する"""
-    writer = PdfWriter()
-    total_pages = len(reader.pages)
+    total_pages = len(doc)
 
+    new_doc = fitz.open()
     for idx in indices:
         if idx < 0 or idx >= total_pages:
             raise ValueError(f"インデックス {idx} は範囲外です (0-{total_pages - 1})")
-        writer.add_page(reader.pages[idx])
+        new_doc.insert_pdf(doc, from_page=idx, to_page=idx)
 
-    with open(output_path, "wb") as f:
-        writer.write(f)
+    new_doc.save(output_path)
+    new_doc.close()
 
 
 def parse_pages_by_index(pages_str: str) -> list[int]:
@@ -63,13 +63,14 @@ def parse_pages_by_label(pages_str: str, label_to_index: dict[str, int]) -> list
     return indices
 
 
-def build_label_to_index(labels: list[str]) -> dict[str, int]:
+def build_label_to_index(doc: fitz.Document) -> dict[str, int]:
     """ラベルからインデックスへのマッピングを作成
 
     重複ラベルがある場合は最初の出現位置を使用
     """
     mapping = {}
-    for idx, label in enumerate(labels):
+    for idx in range(len(doc)):
+        label = doc[idx].get_label()
         if label not in mapping:
             mapping[label] = idx
     return mapping
@@ -95,69 +96,69 @@ def main() -> None:
         print(f"エラー: 入力ファイル '{args.input}' が見つかりません", file=sys.stderr)
         raise SystemExit(1)
 
-    reader = PdfReader(args.input)
-    total_pages = len(reader.pages)
-
-    if args.by_label:
-        labels = reader.page_labels
-        label_to_index = build_label_to_index(labels)
-
-        if args.pages:
-            indices = parse_pages_by_label(args.pages, label_to_index)
-            default_output = f"{args.pages.replace(',', '_')}.pdf"
-        elif args.from_page and args.to_page:
-            if args.from_page not in label_to_index:
-                print(f"エラー: ラベル '{args.from_page}' が見つかりません", file=sys.stderr)
-                raise SystemExit(1)
-            if args.to_page not in label_to_index:
-                print(f"エラー: ラベル '{args.to_page}' が見つかりません", file=sys.stderr)
-                raise SystemExit(1)
-            start_idx = label_to_index[args.from_page]
-            end_idx = label_to_index[args.to_page]
-            if start_idx > end_idx:
-                start_idx, end_idx = end_idx, start_idx
-            indices = list(range(start_idx, end_idx + 1))
-            default_output = f"{args.from_page}-{args.to_page}.pdf"
-        elif args.from_page:
-            if args.from_page not in label_to_index:
-                print(f"エラー: ラベル '{args.from_page}' が見つかりません", file=sys.stderr)
-                raise SystemExit(1)
-            indices = [label_to_index[args.from_page]]
-            default_output = f"{args.from_page}.pdf"
-        else:
-            parser.error("--from/--to または --pages を指定してください")
-    else:
-        if args.pages:
-            indices = parse_pages_by_index(args.pages)
-            default_output = f"{args.pages.replace(',', '_')}.pdf"
-        elif args.from_page and args.to_page:
-            from_page = int(args.from_page)
-            to_page = int(args.to_page)
-            indices = list(range(from_page - 1, to_page))
-            default_output = f"{from_page}-{to_page}.pdf"
-        elif args.from_page:
-            from_page = int(args.from_page)
-            indices = [from_page - 1]
-            default_output = f"{from_page}.pdf"
-        else:
-            parser.error("--from/--to または --pages を指定してください")
-
-    out_dir = Path("out")
-    out_dir.mkdir(exist_ok=True)
-
-    output_path = out_dir / (args.output or Path(default_output))
-
-    if output_path.exists():
-        print(f"エラー: {output_path} は既に存在します", file=sys.stderr)
-        raise SystemExit(1)
+    doc = fitz.open(args.input)
 
     try:
-        extract_pages(reader, indices, output_path)
+        if args.by_label:
+            label_to_index = build_label_to_index(doc)
+
+            if args.pages:
+                indices = parse_pages_by_label(args.pages, label_to_index)
+                default_output = f"{args.pages.replace(',', '_')}.pdf"
+            elif args.from_page and args.to_page:
+                if args.from_page not in label_to_index:
+                    print(f"エラー: ラベル '{args.from_page}' が見つかりません", file=sys.stderr)
+                    raise SystemExit(1)
+                if args.to_page not in label_to_index:
+                    print(f"エラー: ラベル '{args.to_page}' が見つかりません", file=sys.stderr)
+                    raise SystemExit(1)
+                start_idx = label_to_index[args.from_page]
+                end_idx = label_to_index[args.to_page]
+                if start_idx > end_idx:
+                    start_idx, end_idx = end_idx, start_idx
+                indices = list(range(start_idx, end_idx + 1))
+                default_output = f"{args.from_page}-{args.to_page}.pdf"
+            elif args.from_page:
+                if args.from_page not in label_to_index:
+                    print(f"エラー: ラベル '{args.from_page}' が見つかりません", file=sys.stderr)
+                    raise SystemExit(1)
+                indices = [label_to_index[args.from_page]]
+                default_output = f"{args.from_page}.pdf"
+            else:
+                parser.error("--from/--to または --pages を指定してください")
+        else:
+            if args.pages:
+                indices = parse_pages_by_index(args.pages)
+                default_output = f"{args.pages.replace(',', '_')}.pdf"
+            elif args.from_page and args.to_page:
+                from_page = int(args.from_page)
+                to_page = int(args.to_page)
+                indices = list(range(from_page - 1, to_page))
+                default_output = f"{from_page}-{to_page}.pdf"
+            elif args.from_page:
+                from_page = int(args.from_page)
+                indices = [from_page - 1]
+                default_output = f"{from_page}.pdf"
+            else:
+                parser.error("--from/--to または --pages を指定してください")
+
+        out_dir = Path("out")
+        out_dir.mkdir(exist_ok=True)
+
+        output_path = out_dir / (args.output or Path(default_output))
+
+        if output_path.exists():
+            print(f"エラー: {output_path} は既に存在します", file=sys.stderr)
+            raise SystemExit(1)
+
+        extract_pages(doc, indices, output_path)
+        print(f"抽出完了: {output_path} ({len(indices)}ページ)")
+
     except ValueError as e:
         print(f"エラー: {e}", file=sys.stderr)
         raise SystemExit(1)
-
-    print(f"抽出完了: {output_path} ({len(indices)}ページ)")
+    finally:
+        doc.close()
 
 
 if __name__ == "__main__":
